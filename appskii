@@ -1,7 +1,7 @@
 import requests, random, string, multiprocessing
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
 shtuf = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
-print('Version !.0 Made by Lacurity')
+print('Version 1.0 Made by Lacurity')
 print('Xbox Username Checker\n[1] | Start 3L Search\n[2] | Start 4L Search')
 choice = input('Choice: ')
 
