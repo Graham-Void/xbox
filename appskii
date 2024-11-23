@@ -17,7 +17,7 @@ def generateusernames(count):
     Generate a list of random 4-character usernames where the first character is always a letter.
     """
     usernames = []
-    for  in range(count):
+    for i in range(count):
         first_char = random.choice(string.ascii_lowercase)  # Ensure the first character is a letter
         second_char = random.choice(CHARS)
         third_char = random.choice(CHARS)
