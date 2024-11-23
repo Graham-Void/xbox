@@ -1,21 +1,37 @@
 import requests
 import random
 import string
-import time
-import os
-from colorama import Fore
-time.sleep(random.uniform(1, 3))  # Random delay between 1 and 3 seconds
-print("Vital Xbox Checker | v1.1 By Lac")
-os.system('cls' if os.name == 'nt' else 'clear')
 from multiprocessing import Process, Manager
 
-# Headers for the HTTP requests
 HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Connection': 'keep-alive',
 }
 
-# Characters to choose from for generating usernames
 CHARS = string.ascii_lowercase + string.digits
+
+
+def generate_usernames(count):
+    """
+    Generate a list of random 4-character usernames.
+    """
+    return [''.join(random.choices(CHARS, k=4)) for _ in range(count)]
+
+
+def load_proxies(filename):
+    """
+    Load proxies from a file and format them for use with requests.
+    Each proxy in the file should be in the format: username:password@proxy_address:port
+    """
+    try:
+        with open(filename, 'r') as file:
+            proxies = [line.strip() for line in file if line.strip()]
+            formatted_proxies = [{"http": f"http://{proxy}", "https": f"https://{proxy}"} for proxy in proxies]
+            return formatted_proxies
+    except FileNotFoundError:
+        print("Proxy file not found. Running without proxies.")
+        return []
 
 
 def check_username_availability(queue, proxies):
@@ -24,80 +40,55 @@ def check_username_availability(queue, proxies):
     """
     while not queue.empty():
         username = queue.get()  # Fetch username from the queue
-        
         try:
             # Select a random proxy from the proxy list
-            proxy = {"https": f"http://{random.choice(proxies)}"} if proxies else None
-            response = requests.get(f'https://xboxgamertag.com/search/{username}', headers=HEADERS, proxies=proxy, timeout=5)
-            # print(response.status_code, response.text)
-            # Check the response status
+            proxy = random.choice(proxies) if proxies else None
+
+            # Make the request
+            response = requests.get(
+                f'https://xboxgamertag.com/search/{username}',
+                headers=HEADERS,
+                proxies=proxy,
+                timeout=10
+            )
+
+            # Check the response
             if response.status_code == 404:
                 print(f'{username} : AVAILABLE')
-                with open('users.txt', 'a') as available_file:
+                with open('4Lusernames.txt', 'a') as available_file:
                     available_file.write(username + '\n')
             else:
                 print(f'{username} : TAKEN')
 
-        except requests.RequestException:
-            print(f'REQUEST FAILED: {username}')
-
-
-def generate_usernames(count):
-    """
-    Generate a list of random 4-character usernames.
-    """
-    return [
-        ''.join(random.choices(CHARS, k=4))
-        for _ in range(count)
-    ]
-
-
-def load_proxies(filename):
-    """
-    Load proxies from a file.
-    """
-    try:
-        with open(filename, 'r') as file:
-            return [line.strip() for line in file if line.strip()]
-    except FileNotFoundError:
-        print("Proxy file not found. Running without proxies.")
-        return []
+        except requests.RequestException as e:
+            print(f'Error with {username}: {e}')
+            continue
 
 
 def main():
     """
     Main function to start the username checking process.
     """
-    # Number of usernames to generate
     num_usernames = 1000  # Adjust as needed
-
-    # Generate usernames and load proxies
     usernames = generate_usernames(num_usernames)
     proxies = load_proxies("https.txt")
 
-    # Use Manager to share the queue across processes
     with Manager() as manager:
         username_queue = manager.Queue()
 
-        # Fill the queue with generated usernames
         for username in usernames:
             username_queue.put(username)
 
-        # Start multiprocessing
         processes = []
-        num_processes = 10  # Adjust number of processes as needed
+        num_processes = 10  # Adjust the number of processes as needed
         for _ in range(num_processes):
             process = Process(target=check_username_availability, args=(username_queue, proxies))
             process.start()
             processes.append(process)
 
-        # Wait for all processes to finish
         for process in processes:
             process.join()
 
-try:
-    if __name__ == '__main__':
-        main()
-except KeyboardInterrupt:
-    print("Exiting...")
-    exit(0)
+
+if __name__ == "__main__":
+    main()
