@@ -14,9 +14,15 @@ CHARS = string.ascii_lowercase + string.digits
 
 def generate_usernames(count):
     """
-    Generate a list of random 4-character usernames.
+    Generate a list of random 4-character usernames where the first character is always a letter.
     """
-    return [''.join(random.choices(CHARS, k=4)) for _ in range(count)]
+    usernames = []
+    for _ in range(count):
+        first_char = random.choice(string.ascii_lowercase)  # Ensure the first character is a letter
+        remaining_chars = ''.join(random.choices(string.ascii_lowercase + string.digits, k=3))  # Mix letters and digits
+        usernames.append(first_char + remaining_chars)
+    return usernames
+
 
 
 def load_proxies(filename):
